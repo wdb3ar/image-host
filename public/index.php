@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Auto-load classes
  */
@@ -21,5 +20,4 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $container->config = $config;
 $container->pdo = $pdo;
 
-require __DIR__.'/../src/route.php';
-Route::start();
+Router::start();

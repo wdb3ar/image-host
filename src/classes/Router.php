@@ -1,5 +1,5 @@
 <?php
-class Route
+class Router
 {
     public static function start()
     {
@@ -19,13 +19,12 @@ class Route
         $controllerName = ucfirst($controllerName).'Controller';
         $action = 'action'.ucfirst($action);
 
-
-        $controllerPath =  __DIR__."/controllers/".$controllerName.".php";
+        $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
 
         if (file_exists($controllerPath)) {
             include $controllerPath;
         } else {
-            Route::ErrorPage404();
+            Router::ErrorPage404();
         }
 
         $controller = new $controllerName;
@@ -33,7 +32,7 @@ class Route
         if (method_exists($controller, $action)) {
             $controller->$action();
         } else {
-            Route::ErrorPage404();
+            Router::ErrorPage404();
         }
     }
 

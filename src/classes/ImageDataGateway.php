@@ -14,7 +14,7 @@ class ImageDataGateway
 
     public function getImages()
     {
-        $query = $this->pdo->query('SELECT id, name, path from image');
+        $query = $this->pdo->query('SELECT * from image');
         $query->setFetchMode(PDO::FETCH_CLASS, 'Image');
         return $query->fetchAll();
     }
