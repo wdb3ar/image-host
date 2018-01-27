@@ -17,18 +17,20 @@ class Router
         $routes = explode('/', $parsedUri['path']);
 
         try {
+            if (count($routes)>3) {
+                throw new Exception('Invalid url');
+            }
             if (!array_key_exists($routes[1], self::$routes)) {
                 throw new Exception('Route not found');
             }
             $controllerAction = explode('@', self::$routes[$routes[1]]);
-
             $controllerName = $controllerAction[0];
             $action = $controllerAction[1];
             $variableName = !empty($controllerAction[2]) ? $controllerAction[2] : null;
             $variable = !empty($routes[2]) ? $routes[2] : null;
 
             if ($variable && !$variableName) {
-              throw new Exception('The route does not support a variable');
+                throw new Exception('The route does not support a variable');
             }
 
             $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
@@ -54,7 +56,7 @@ class Router
         }
     }
 
-    static public function redirectNotFound()
+    public static function redirectNotFound()
     {
         $host = 'http://'.$_SERVER['HTTP_HOST'].'/';
         header('HTTP/1.1 404 Not Found');
