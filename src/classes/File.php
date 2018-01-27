@@ -2,15 +2,19 @@
 
 class File
 {
-    public $newName;
-    static private $directory = '/upload/';
+    private static $directory = '/upload/';
+
+    private $newName;
     private $directoryPath;
     private $file;
 
 
-    public function __construct($file)
+    public function getDirectoryPath()
     {
-        $this->directoryPath = $_SERVER['DOCUMENT_ROOT'] . $this->directory;
+        if (!$this->directoryPath) {
+            $this->directoryPath = $_SERVER['DOCUMENT_ROOT'] . self::$directory;
+        }
+        return $this->directoryPath;
     }
 
     public function setFile($file)
@@ -24,19 +28,21 @@ class File
      */
     public function getNewName()
     {
-        while (true) {
-            $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
-            if (!file_exists($this->directoryPath . $newName)) {
-                break;
+        if (!$this->newName) {
+            while (true) {
+                $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
+                if (!file_exists($this->getDirectoryPath() . $newName)) {
+                    $this->newName = $newName;
+                    break;
+                }
             }
         }
-        return $newName;
+        return $this->newName;
     }
 
     public function save()
     {
-        $this->newName = $this->getNewName();
-        if (move_uploaded_file($this->file["tmp_name"], $this->directoryPath . $this->newName)) {
+        if (move_uploaded_file($this->file["tmp_name"], $this->getDirectoryPath() . $this->getNewName())) {
             return true;
         }
         return false;
@@ -44,11 +50,15 @@ class File
 
     public function delete()
     {
-        unlink($this->directoryPath . $this->newName);
+        if (file_exists($this->getDirectoryPath() . $this->getNewName())) {
+            unlink($this->getDirectoryPath() . $this->getNewName());
+            return true;
+        }
+        return false;
     }
 
-    static public function getFile($name)
+    public static function getFile($name)
     {
-      return self::$directory . $name;
+        return self::$directory . $name;
     }
 }

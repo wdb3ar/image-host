@@ -5,7 +5,8 @@ class Router
       '' => 'SiteController@actionIndex',
       'image' => 'ImageController@actionImage@id',
       'edit' => 'ImageController@actionEdit@id',
-      'add' => 'ImageController@actionAdd'
+      'add' => 'ImageController@actionAdd',
+      'add@post' => 'ImageController@actionAddPost'
     ];
 
     public static function start()
@@ -20,10 +21,13 @@ class Router
             if (count($routes)>3) {
                 throw new Exception('Invalid url');
             }
-            if (!array_key_exists($routes[1], self::$routes)) {
+            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            }
+            $route = ($_SERVER['REQUEST_METHOD'] == 'POST') ? $routes[1].'@post' : $routes[1];
+            if (!array_key_exists($route, self::$routes)) {
                 throw new Exception('Route not found');
             }
-            $controllerAction = explode('@', self::$routes[$routes[1]]);
+            $controllerAction = explode('@', self::$routes[$route]);
             $controllerName = $controllerAction[0];
             $action = $controllerAction[1];
             $variableName = !empty($controllerAction[2]) ? $controllerAction[2] : null;
