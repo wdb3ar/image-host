@@ -2,39 +2,53 @@
 
 class File
 {
-  public $newName;
-  private $directory;
-  private $file;
+    public $newName;
+    static private $directory = '/upload/';
+    private $directoryPath;
+    private $file;
 
 
-  public function __construct($file) {
-    $this->file = $file;
-    $this->directory = $_SERVER['DOCUMENT_ROOT'] . '/upload/';
-  }
+    public function __construct($file)
+    {
+        $this->directoryPath = $_SERVER['DOCUMENT_ROOT'] . $this->directory;
+    }
 
-/**
- * Generate a unique name for the file
- * @return string
- */
-  public function getNewName() {
-    while (true) {
-        $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
-        if (!file_exists($this->directory . $newName)) {
-          break;
+    public function setFile($file)
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * Generate a unique name for the file
+     * @return string
+     */
+    public function getNewName()
+    {
+        while (true) {
+            $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
+            if (!file_exists($this->directoryPath . $newName)) {
+                break;
+            }
         }
+        return $newName;
     }
-    return $newName;
-  }
 
-  public function save() {
-    $this->newName = $this->getNewName();
-    if (move_uploaded_file($this->file["tmp_name"], $this->directory . $this->newName)) {
-      return true;
+    public function save()
+    {
+        $this->newName = $this->getNewName();
+        if (move_uploaded_file($this->file["tmp_name"], $this->directoryPath . $this->newName)) {
+            return true;
+        }
+        return false;
     }
-    return false;
-  }
 
-  public function delete() {
-    unlink($this->directory . $this->newName);
-  }
+    public function delete()
+    {
+        unlink($this->directoryPath . $this->newName);
+    }
+
+    static public function getFile($name)
+    {
+      return self::$directory . $name;
+    }
 }

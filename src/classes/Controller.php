@@ -2,10 +2,12 @@
 
 abstract class Controller
 {
-    public $view;
+    protected $view;
+    protected $container;
 
     public function __construct()
     {
         $this->view = new View();
+        $this->container = Container::getInstance();
     }
 }

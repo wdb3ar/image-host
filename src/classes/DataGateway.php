@@ -37,11 +37,10 @@ class DataGateway
     public function saveImage($name, $path)
     {
         $query = $this->pdo->prepare(
-        'INSERT INTO image (name, path) values (:name, :path)'
-      );
-        $query->bindParam(':name', $name);
-        $query->bindParam(':path', $path);
-        if ($query->execute()) {
+        'INSERT INTO image (name, path) values (?, ?)'
+        );
+
+        if ($query->execute([$name, $path])) {
             return $this->pdo->lastInsertId();
         }
         return false;
@@ -78,5 +77,6 @@ class DataGateway
           );
             return $query->execute($insertValues);
         }
+        return false;
     }
 }

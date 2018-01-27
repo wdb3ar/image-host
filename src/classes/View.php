@@ -11,11 +11,4 @@ class View
         include  __DIR__.'/../../views/layout.php';
     }
 
-    private function getErrorsHtml($errors) {
-      if (!$errors) {
-        return false;
-      }
-      
-
-    }
 }

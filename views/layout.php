@@ -26,7 +26,7 @@
             <strong>Image Host</strong>
           </a>
           <?php if ($_SERVER['REQUEST_URI'] != '/main/add'): ?>
-            <a href="/main/add" class="btn btn-primary">Add an Image</a>
+            <a href="/add" class="btn btn-primary">Add an Image</a>
           <?php endif; ?>
         </div>
       </div>

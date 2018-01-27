@@ -1,42 +1,60 @@
 <?php
 class Router
 {
+    private static $routes = [
+      '' => 'SiteController@actionIndex',
+      'image' => 'ImageController@actionImage@id',
+      'edit' => 'ImageController@actionEdit@id',
+      'add' => 'ImageController@actionAdd'
+    ];
+
     public static function start()
     {
         $controllerName = 'Main';
         $action = 'index';
 
-        $routes = explode('/', $_SERVER['REQUEST_URI']);
+        $parsedUri = parse_url($_SERVER['REQUEST_URI']);
+        $routes = explode('/', $parsedUri['path']);
 
-        if (!empty($routes[1])) {
-            $controllerName = $routes[1];
-        }
+        try {
+            if (!array_key_exists($routes[1], self::$routes)) {
+                throw new Exception('Route not found');
+            }
+            $controllerAction = explode('@', self::$routes[$routes[1]]);
 
-        if (!empty($routes[2])) {
-            $action = $routes[2];
-        }
+            $controllerName = $controllerAction[0];
+            $action = $controllerAction[1];
+            $variableName = !empty($controllerAction[2]) ? $controllerAction[2] : null;
+            $variable = !empty($routes[2]) ? $routes[2] : null;
 
-        $controllerName = ucfirst($controllerName).'Controller';
-        $action = 'action'.ucfirst($action);
+            if ($variable && !$variableName) {
+              throw new Exception('The route does not support a variable');
+            }
 
-        $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
+            $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
 
-        if (file_exists($controllerPath)) {
-            include $controllerPath;
-        } else {
-            Router::ErrorPage404();
-        }
+            if (file_exists($controllerPath)) {
+                include $controllerPath;
+            } else {
+                throw new Exception('Controller not found');
+            }
 
-        $controller = new $controllerName;
-
-        if (method_exists($controller, $action)) {
-            $controller->$action();
-        } else {
-            Router::ErrorPage404();
+            $controller = new $controllerName;
+            if (method_exists($controller, $action)) {
+                $controller->$action($variable);
+            } else {
+                throw new Exception('Action not found');
+            }
+        } catch (Exception $e) {
+            $container = Container::getInstance();
+            if ($container->config['debug']) {
+                throw $e;
+            }
+            return self::redirectNotFound();
         }
     }
 
-    public function ErrorPage404()
+    static public function redirectNotFound()
     {
         $host = 'http://'.$_SERVER['HTTP_HOST'].'/';
         header('HTTP/1.1 404 Not Found');

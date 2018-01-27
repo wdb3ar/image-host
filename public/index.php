@@ -22,10 +22,6 @@ if ($config['debug']) {
     error_reporting(E_ALL);
 }
 
-$pdo = new PDO("mysql:host=".$config['host'].";dbname=".$config['dbname'].";charset=".$config['charset'], $config['user'], $config['pass']);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 $container->config = $config;
-$container->pdo = $pdo;
 
 Router::start();

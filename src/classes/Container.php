@@ -4,8 +4,8 @@ final class Container
 {
     private static $instance;
 
-    public $pdo;
     public $config;
+    private $pdo;
 
     public static function getInstance()
     {
@@ -13,6 +13,19 @@ final class Container
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public function getPdo()
+    {
+        if (!$this->pdo) {
+            $this->pdo = new PDO(
+              "mysql:host=" . $this->config['host'] . ";dbname=" . $this->config['dbname'] . ";charset=" . $this->config['charset'],
+              $this->config['user'],
+              $this->config['pass']
+            );
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
+        return $this->pdo;
     }
 
 
