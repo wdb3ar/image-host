@@ -5,7 +5,7 @@ final class Container
     private static $instance;
 
     public $config;
-    private $pdo;
+    private $dbh;
 
     public static function getInstance()
     {
@@ -15,17 +15,17 @@ final class Container
         return self::$instance;
     }
 
-    public function getPdo()
+    public function getDbh()
     {
-        if (!$this->pdo) {
-            $this->pdo = new PDO(
-              "mysql:host=" . $this->config['host'] . ";dbname=" . $this->config['dbname'] . ";charset=" . $this->config['charset'],
+        if (!$this->dbh) {
+            $this->dbh = new PDO(
+              "mysql:host=".$this->config['host'] .";dbname=".$this->config['dbname'] .";charset=".$this->config['charset'],
               $this->config['user'],
               $this->config['pass']
             );
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
-        return $this->pdo;
+        return $this->dbh;
     }
 
 

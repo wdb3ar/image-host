@@ -43,7 +43,7 @@ class Validator
             $this->errors['tags'][] = 'The tags field can not be empty.';
         } else {
             foreach ($tags as $tag) {
-                if (!preg_match("/^[a-zA-Zа-яёА-ЯЁ0-9\-_]+$/u", $tag)) {
+                if (!preg_match("/^[a-zA-Zа-яёА-ЯЁ0-9\-_ ]+$/u", $tag)) {
                     $this->errors['tags']['characters'] = 'The tags field contains invalid characters. Only letters and numbers are allowed.';
                 }
                 if (strlen($tag)>=255) {

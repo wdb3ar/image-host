@@ -6,42 +6,78 @@
 class DataGateway
 {
     public $errors=[];
-    private $pdo;
-    public function __construct(\PDO $pdo)
+    private $dbh;
+    public function __construct(\PDO $dbh)
     {
-        $this->pdo = $pdo;
+        $this->dbh = $dbh;
     }
 
     public function getImages()
     {
-        $query = $this->pdo->query('SELECT * from image');
-        $query->setFetchMode(PDO::FETCH_CLASS, 'Image');
-        return $query->fetchAll();
+        $sth = $this->dbh->query('SELECT * FROM image');
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        return $sth->fetchAll();
+    }
+
+    public function getImageWithTagsById($id)
+    {
+        $sth = $this->dbh->prepare(
+        'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+        FROM image AS i
+        JOIN image_tag AS it
+        ON i.id = image_id AND image_id = :id
+        JOIN tag AS t
+        ON t.id = tag_id
+        GROUP BY i.id'
+      );
+        $sth->bindValue(':id', $id, PDO::PARAM_INT);
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        if (!$sth->execute()) {
+            return false;
+        }
+        return $sth->fetch();
     }
 
     public function getImagesWithTags()
     {
-        $query = $this->pdo->query(
-          'SELECT i.*, GROUP_CONCAT(t.id) as tag_ids, GROUP_CONCAT(t.name) as tag_names
+        $sth = $this->dbh->query(
+          'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
           FROM image AS i
           JOIN image_tag AS it
           ON i.id = it.image_id
           JOIN tag AS t
-          on t.id = it.tag_id
-          group by i.id'
+          ON t.id = it.tag_id
+          GROUP BY i.id'
         );
-        $query->setFetchMode(PDO::FETCH_CLASS, 'Image');
-        return $query->fetchAll();
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        return $sth->fetchAll();
+    }
+
+    public function getTagsByNames($tags)
+    {
+        $insertValues = [];
+        foreach ($tags as $tag) {
+            $questionMarks[] = '?';
+            $insertValues = array_merge($insertValues, [$tag]);
+        }
+        $sth = $this->dbh->prepare('SELECT * FROM tag WHERE name in ('.implode(',', $questionMarks).')');
+
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Tag');
+
+        if ($sth->execute($insertValues)) {
+            return $sth->fetchAll();
+        }
+        return false;
     }
 
     public function saveImage($name, $path)
     {
-        $query = $this->pdo->prepare(
-        'INSERT INTO image (name, path) values (?, ?)'
+        $sth = $this->dbh->prepare(
+        'INSERT INTO image (name, path) VALUES (?, ?)'
         );
 
-        if ($query->execute([$name, $path])) {
-            return $this->pdo->lastInsertId();
+        if ($sth->execute([$name, $path])) {
+            return $this->dbh->lastInsertId();
         }
         return false;
     }
@@ -53,11 +89,27 @@ class DataGateway
             $questionMarks[] = '(?)';
             $insertValues[] = $tag;
         }
-        $query = $this->pdo->prepare(
+        $sth = $this->dbh->prepare(
           'INSERT INTO tag (name) VALUES ' . implode(',', $questionMarks)
         );
-        if ($query->execute($insertValues)) {
-            return $this->pdo->lastInsertId();
+        if ($sth->execute($insertValues)) {
+            return $this->dbh->lastInsertId();
+        }
+        return false;
+    }
+
+    public function saveImageTagsRelations($imageId, $tagIds)
+    {
+        $insertValues = [];
+        foreach ($tagIds as $tagId) {
+            $questionMarks[] = '(?,?)';
+            $insertValues = array_merge($insertValues, [$imageId, $tagId]);
+        }
+        $sth = $this->dbh->prepare(
+        'INSERT INTO image_tag (image_id, tag_id) VALUES ' . implode(',', $questionMarks)
+        );
+        if ($sth->execute($insertValues)) {
+            return true;
         }
         return false;
     }
@@ -67,15 +119,27 @@ class DataGateway
         if (($imageId = $this->saveImage($imageName, $imagePath)) && ($firstTagId = $this->saveTags($tags))) {
             // Create an array of tag IDs
             $tagIds=range($firstTagId, $firstTagId+count($tags)-1);
-            $insertValues = [];
-            foreach ($tagIds as $tagId) {
-                $questionMarks[] = '(?,?)';
-                $insertValues = array_merge($insertValues, [$imageId, $tagId]);
+            if ($this->saveImageTagsRelations($imageId, $tagIds)) {
+                return $imageId;
             }
-            $query = $this->pdo->prepare(
-            'INSERT INTO image_tag (image_id, tag_id) VALUES ' . implode(',', $questionMarks)
-          );
-            return $query->execute($insertValues);
+        }
+        return false;
+    }
+
+    public function saveImageNewTags($imageId, $tags)
+    {
+        $foundsTags = $this->getTagsByNames($tags);
+        if ($foundsTags) {
+            foreach ($foundsTags as $tag) {
+                $foundsTagsNew[$tag->id] = $tag->name;
+            }
+            $tagsDiff = array_diff($tags, $foundsTagsNew);
+            if ($tagsDiff && ($firstTagId = $this->saveTags($tagsDiff))) {
+                $tagIds=range($firstTagId, $firstTagId+count($tagsDiff)-1);
+                if ($this->saveImageTagsRelations($imageId, $tagIds)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

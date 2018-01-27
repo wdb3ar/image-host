@@ -24,4 +24,12 @@ if ($config['debug']) {
 
 $container->config = $config;
 
-Router::start();
+try {
+    Router::start();
+} catch (NotFoundException $e) {
+    if ($container->config['debug']) {
+        throw $e;
+    }
+
+    $e->showNotFoundPage();
+}

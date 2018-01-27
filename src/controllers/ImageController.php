@@ -10,12 +10,9 @@ class ImageController extends Controller
     public function actionAddPost()
     {
         $data = [];
-        $uploadedFile = array_key_exists('inputFile', $_FILES) ? $_FILES['inputFile'] : null;
-        $tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : null;
-        if ($tags) {
-            //Convert a string to an array, and delete the empty elements
-            $tags = array_diff(explode(',', $_POST['tags']), ['']);
-        }
+
+        $uploadedFile = FormData::getUploadedFile();
+        $tags = FormData::getTags();
 
         $validator = new Validator;
         $validator->validateImage($uploadedFile);
@@ -26,18 +23,19 @@ class ImageController extends Controller
             $file = new File();
             $file->setFile($uploadedFile);
             if ($file->save()) {
-                $image = new Image($uploadedFile['name'], $file->getNewName());
                 try {
-                    $pdo = $this->container->getPdo();
-                    $dataGateway = new DataGateway($pdo);
-                    $pdo->beginTransaction();
-                    $result = $dataGateway->saveImageAndTags($image->name, $image->path, $tags);
-                    if (!$result) {
+                    $image = new Image($uploadedFile['name'], $file->getNewName());
+                    $dbh = $this->container->getDbh();
+                    $dataGateway = new DataGateway($dbh);
+                    $dbh->beginTransaction();
+                    $imageId = $dataGateway->saveImageAndTags($image->name, $image->path, $tags);
+                    if (!$imageId) {
                         throw new Exception('Failed to save data to database');
                     }
-                    $pdo->commit();
+                    $dbh->commit();
+                    header('Location: /edit/'.$imageId);
                 } catch (Exception $e) {
-                    $pdo->rollBack();
+                    $dbh->rollBack();
                     $file->delete();
                     throw $e;
                 }
@@ -47,7 +45,53 @@ class ImageController extends Controller
         return $this->view->generate('add', $data);
     }
 
-    public function actionEdit($id)
+    public function actionEdit($imageId)
     {
+        if (!preg_match("/^[1-9]([0-9]+)?$/u", $imageId)) {
+            throw new NotFoundException('The variable must be an integer');
+        }
+        $dataGateway = new DataGateway($this->container->getDbh());
+        $image = $dataGateway->getImageWithTagsById($imageId);
+        if (!$image) {
+            throw new NotFoundException('Image with this id is not found');
+        }
+
+        return $this->view->generate('edit', ['image'=>$image]);
+    }
+
+    public function actionEditPost($imageId)
+    {
+        if (!preg_match("/^[1-9]([0-9]+)?$/u", $imageId)) {
+            throw new NotFoundException('The variable must be an integer');
+        }
+
+        $dbh = $this->container->getDbh();
+        $dataGateway = new DataGateway($dbh);
+        $data['image'] = $dataGateway->getImageWithTagsById($imageId);
+        if (!$data['image']) {
+            throw new NotFoundException('Image with this id is not found');
+        }
+
+        $tags = FormData::getTags();
+
+        $validator = new Validator;
+        $validator->validateTags($tags);
+        if ($validator->errors) {
+            $data['errors'] = $validator->getHtmlErrors();
+        } else {
+            try {
+                $dbh->beginTransaction();
+                if ($dataGateway->saveImageNewTags($imageId, $tags)) {
+                    $dbh->commit();
+                    header('Location: /edit/'.$imageId);
+                }
+            } catch (Exception $e) {
+                $dbh->rollBack();
+                $file->delete();
+                throw $e;
+            }
+        }
+
+        return $this->view->generate('edit', $data);
     }
 }

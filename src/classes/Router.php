@@ -3,8 +3,8 @@ class Router
 {
     private static $routes = [
       '' => 'SiteController@actionIndex',
-      'image' => 'ImageController@actionImage@id',
-      'edit' => 'ImageController@actionEdit@id',
+      'edit' => 'ImageController@actionEdit@imageId',
+      'edit@post' => 'ImageController@actionEditPost@imageId',
       'add' => 'ImageController@actionAdd',
       'add@post' => 'ImageController@actionAddPost'
     ];
@@ -17,54 +17,38 @@ class Router
         $parsedUri = parse_url($_SERVER['REQUEST_URI']);
         $routes = explode('/', $parsedUri['path']);
 
-        try {
-            if (count($routes)>3) {
-                throw new Exception('Invalid url');
-            }
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            }
-            $route = ($_SERVER['REQUEST_METHOD'] == 'POST') ? $routes[1].'@post' : $routes[1];
-            if (!array_key_exists($route, self::$routes)) {
-                throw new Exception('Route not found');
-            }
-            $controllerAction = explode('@', self::$routes[$route]);
-            $controllerName = $controllerAction[0];
-            $action = $controllerAction[1];
-            $variableName = !empty($controllerAction[2]) ? $controllerAction[2] : null;
-            $variable = !empty($routes[2]) ? $routes[2] : null;
-
-            if ($variable && !$variableName) {
-                throw new Exception('The route does not support a variable');
-            }
-
-            $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
-
-            if (file_exists($controllerPath)) {
-                include $controllerPath;
-            } else {
-                throw new Exception('Controller not found');
-            }
-
-            $controller = new $controllerName;
-            if (method_exists($controller, $action)) {
-                $controller->$action($variable);
-            } else {
-                throw new Exception('Action not found');
-            }
-        } catch (Exception $e) {
-            $container = Container::getInstance();
-            if ($container->config['debug']) {
-                throw $e;
-            }
-            return self::redirectNotFound();
+        if (count($routes)>3) {
+            throw new NotFoundException('Invalid url');
         }
-    }
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        }
+        $route = ($_SERVER['REQUEST_METHOD'] == 'POST') ? $routes[1].'@post' : $routes[1];
+        if (!array_key_exists($route, self::$routes)) {
+            throw new NotFoundException('Route not found');
+        }
+        $controllerAction = explode('@', self::$routes[$route]);
+        $controllerName = $controllerAction[0];
+        $action = $controllerAction[1];
+        $variableName = !empty($controllerAction[2]) ? $controllerAction[2] : null;
+        $variable = !empty($routes[2]) ? $routes[2] : null;
 
-    public static function redirectNotFound()
-    {
-        $host = 'http://'.$_SERVER['HTTP_HOST'].'/';
-        header('HTTP/1.1 404 Not Found');
-        header("Status: 404 Not Found");
-        header('Location:'.$host.'404');
+        if ($variable && !$variableName) {
+            throw new NotFoundException('The route does not support a variable');
+        }
+
+        $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
+
+        if (file_exists($controllerPath)) {
+            include $controllerPath;
+        } else {
+            throw new NotFoundException('Controller not found');
+        }
+
+        $controller = new $controllerName;
+        if (method_exists($controller, $action)) {
+            $controller->$action($variable);
+        } else {
+            throw new NotFoundException('Action not found');
+        }
     }
 }
