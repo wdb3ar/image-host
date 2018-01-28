@@ -34,6 +34,7 @@ class ImageController extends Controller
                     }
                     $dbh->commit();
                     header('Location: /edit/'.$imageId);
+                    exit();
                 } catch (Exception $e) {
                     $dbh->rollBack();
                     $file->delete();
@@ -81,13 +82,17 @@ class ImageController extends Controller
         } else {
             try {
                 $dbh->beginTransaction();
-                if ($dataGateway->saveImageNewTags($imageId, $tags)) {
+                if ($dataGateway->editImageTags($imageId, $tags)) {
                     $dbh->commit();
                     header('Location: /edit/'.$imageId);
+                    exit();
                 }
             } catch (Exception $e) {
                 $dbh->rollBack();
-                $file->delete();
+                if ($e instanceof TagEditException) {
+                    header('Location: /edit/'.$imageId);
+                    exit();
+                }
                 throw $e;
             }
         }
