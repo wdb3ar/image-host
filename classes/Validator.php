@@ -53,6 +53,10 @@ class Validator
         }
     }
 
+    static public function checkId($id) {
+      return preg_match("/^[1-9]([0-9]+)?$/u", $id);
+    }
+
     public function getHtmlErrors()
     {
         foreach ($this->errors as $name => $group) {

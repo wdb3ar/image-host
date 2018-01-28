@@ -4,5 +4,4 @@ class Tag
 {
     public $id;
     public $name;
-
 }

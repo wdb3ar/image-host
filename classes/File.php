@@ -4,9 +4,11 @@ class File
 {
     private static $directory = '/upload/';
 
+    public $name;
     private $newName;
     private $directoryPath;
     private $file;
+
 
 
     public function getDirectoryPath()
@@ -28,30 +30,29 @@ class File
      */
     public function getNewName()
     {
-        if (!$this->newName) {
-            while (true) {
-                $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
-                if (!file_exists($this->getDirectoryPath() . $newName)) {
-                    $this->newName = $newName;
-                    break;
-                }
+        while (true) {
+            $newName = uniqid(rand(), true) . '.' . pathinfo($this->file["name"], PATHINFO_EXTENSION);
+            if (!file_exists($this->getDirectoryPath() . $newName)) {
+                return $newName;
+                break;
             }
         }
-        return $this->newName;
     }
 
     public function save()
     {
-        if (move_uploaded_file($this->file["tmp_name"], $this->getDirectoryPath() . $this->getNewName())) {
+        $this->name = $this->getNewName();
+        if (move_uploaded_file($this->file["tmp_name"], $this->getDirectoryPath() . $this->name)) {
             return true;
         }
         return false;
     }
 
-    public function delete()
+    public function delete($name = null)
     {
-        if (file_exists($this->getDirectoryPath() . $this->getNewName())) {
-            unlink($this->getDirectoryPath() . $this->getNewName());
+        $name = $name ?: $this->name;
+        if (file_exists($this->getDirectoryPath() . $name)) {
+            unlink($this->getDirectoryPath() . $name);
             return true;
         }
         return false;

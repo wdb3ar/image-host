@@ -8,7 +8,7 @@ class View
             extract($data);
         }
 
-        include  __DIR__.'/../../views/layout.php';
+        include  __DIR__.'/../views/layout.php';
     }
 
 }

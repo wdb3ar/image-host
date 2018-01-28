@@ -6,6 +6,6 @@ class NotFoundException extends Exception
     {
         header('HTTP/1.1 404 Not Found');
         $template = 'not-found';
-        include  __DIR__.'/../../views/layout.php';
+        include  __DIR__.'/../views/layout.php';
     }
 }

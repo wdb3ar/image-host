@@ -12,20 +12,30 @@ class DataGateway
         $this->dbh = $dbh;
     }
 
-    public function getImageWithTagsById($id)
+
+    public function getImageById($imageId)
+    {
+        $sth = $this->dbh->prepare('SELECT * FROM image WHERE id = ?');
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        if (!$sth->execute([$imageId])) {
+            return false;
+        }
+        return $sth->fetch();
+    }
+
+    public function getImageWithTagsById($imageId)
     {
         $sth = $this->dbh->prepare(
         'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
         FROM image AS i
         JOIN image_tag AS it
-        ON i.id = image_id AND image_id = :id
+        ON i.id = image_id AND image_id = ?
         JOIN tag AS t
         ON t.id = tag_id
         GROUP BY i.id'
       );
-        $sth->bindValue(':id', $id, PDO::PARAM_INT);
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
-        if (!$sth->execute()) {
+        if (!$sth->execute([$imageId])) {
             return false;
         }
         return $sth->fetch();
@@ -72,6 +82,14 @@ class DataGateway
             return $sth->fetchAll();
         }
         return false;
+    }
+
+    public function deleteImageById($imageId)
+    {
+        $sth = $this->dbh->prepare(
+          'DELETE FROM image WHERE id = ?'
+        );
+        return $sth->execute([$imageId]);
     }
 
     public function deleteRelations($imageId)
@@ -210,6 +228,14 @@ class DataGateway
             if ($this->saveImageTagsRelations($imageId, $tagIds) && $this->deleteUnusedTags()) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public function deleteImageWithTags($imageId)
+    {
+        if ($this->deleteImageById($imageId) && $this->deleteUnusedTags()) {
+            return true;
         }
         return false;
     }

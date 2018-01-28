@@ -24,7 +24,7 @@ class ImageController extends Controller
             $file->setFile($uploadedFile);
             if ($file->save()) {
                 try {
-                    $image = new Image($uploadedFile['name'], $file->getNewName());
+                    $image = new Image($uploadedFile['name'], $file->name);
                     $dbh = $this->container->getDbh();
                     $dataGateway = new DataGateway($dbh);
                     $dbh->beginTransaction();
@@ -41,6 +41,7 @@ class ImageController extends Controller
                     throw $e;
                 }
             }
+            throw new Exception("Could not save file");
         }
 
         return $this->view->generate('add', $data);
@@ -48,7 +49,7 @@ class ImageController extends Controller
 
     public function actionEdit($imageId)
     {
-        if (!preg_match("/^[1-9]([0-9]+)?$/u", $imageId)) {
+        if (!Validator::checkId($imageId)) {
             throw new NotFoundException('The variable must be an integer');
         }
         $dataGateway = new DataGateway($this->container->getDbh());
@@ -62,7 +63,7 @@ class ImageController extends Controller
 
     public function actionEditPost($imageId)
     {
-        if (!preg_match("/^[1-9]([0-9]+)?$/u", $imageId)) {
+        if (!Validator::checkId($imageId)) {
             throw new NotFoundException('The variable must be an integer');
         }
 
@@ -87,6 +88,7 @@ class ImageController extends Controller
                     header('Location: /edit/'.$imageId);
                     exit();
                 }
+                throw new Exception('Failed to save data to database');
             } catch (Exception $e) {
                 $dbh->rollBack();
                 if ($e instanceof TagEditException) {
@@ -98,5 +100,32 @@ class ImageController extends Controller
         }
 
         return $this->view->generate('edit', $data);
+    }
+
+    public function actionDeletePost()
+    {
+        $imageId = FormData::getImageId();
+        if (!Validator::checkId($imageId)) {
+            throw new NotFoundException('The variable imageId must be an integer');
+        }
+        $dbh = $this->container->getDbh();
+        $dataGateway = new DataGateway($dbh);
+        $image = $dataGateway->getImageById($imageId);
+        if (!$image) {
+            throw new NotFoundException('Image with this id not found');
+        }
+        try {
+            $dbh->beginTransaction();
+            if ($dataGateway->deleteImageWithTags($imageId)) {
+                $dbh->commit();
+                $file = new File();
+                $file->delete($image->path);
+                exit(json_encode(['status'=>true]));
+            }
+            throw new Exception('Failed to delete image with tags in the database');
+        } catch (Exception $e) {
+            $dbh->rollBack();
+            throw $e;
+        }
     }
 }

@@ -6,7 +6,8 @@ class Router
       'edit' => 'ImageController@actionEdit@imageId',
       'edit@post' => 'ImageController@actionEditPost@imageId',
       'add' => 'ImageController@actionAdd',
-      'add@post' => 'ImageController@actionAddPost'
+      'add@post' => 'ImageController@actionAddPost',
+      'delete@post' => 'ImageController@actionDeletePost'
     ];
 
     public static function start()
@@ -36,7 +37,7 @@ class Router
             throw new NotFoundException('The route does not support a variable');
         }
 
-        $controllerPath =  __DIR__."/../controllers/".$controllerName.".php";
+        $controllerPath =  __DIR__."/Controllers/".$controllerName.".php";
 
         if (file_exists($controllerPath)) {
             include $controllerPath;
