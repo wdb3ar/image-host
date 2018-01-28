@@ -7,7 +7,8 @@ class Router
       'edit@post' => 'ImageController@actionEditPost@imageId',
       'add' => 'ImageController@actionAdd',
       'add@post' => 'ImageController@actionAddPost',
-      'delete@post' => 'ImageController@actionDeletePost'
+      'delete@post' => 'ImageController@actionDeletePost',
+      'search' => 'SiteController@actionSearch'
     ];
 
     public static function start()

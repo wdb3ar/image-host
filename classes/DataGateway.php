@@ -33,12 +33,32 @@ class DataGateway
         JOIN tag AS t
         ON t.id = tag_id
         GROUP BY i.id'
-      );
+        );
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
         if (!$sth->execute([$imageId])) {
             return false;
         }
         return $sth->fetch();
+    }
+
+    public function getImagesWithTagsByQuery($query)
+    {
+        $sth = $this->dbh->prepare(
+        'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+        FROM image AS i
+        JOIN image_tag AS it
+        ON i.id = image_id
+        JOIN tag AS t
+        ON t.id = tag_id AND t.name LIKE :query
+        GROUP BY i.id'
+        );
+        $query = '%'.$query.'%';
+        $sth->bindParam(':query', $query, PDO::PARAM_STR);;
+        $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        if (!$sth->execute()) {
+            return false;
+        }
+        return $sth->fetchAll();
     }
 
     public function getImagesWithTags()

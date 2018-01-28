@@ -16,6 +16,14 @@ footer p {
 }
 
 .error-template {
-    padding: 40px 15px;
-    text-align: center;
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.navbar-container {
+  display: flex;
+}
+
+.navbar-container .navbar-brand {
+  margin-right: 30px;
 }

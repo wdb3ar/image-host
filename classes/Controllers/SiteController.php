@@ -9,9 +9,12 @@ class SiteController extends Controller
 
         return $this->view->generate('index', ['images' => $images]);
     }
-    
-    public function actionNotFound()
+
+    public function actionSearch()
     {
-        return $this->view->generate('not-found');
+        $query = FormData::getQuery();
+        $dataGateway = new DataGateway($this->container->getDbh());
+        $images = $dataGateway->getImagesWithTagsByQuery($query);
+        return $this->view->generate('index', ['images' => $images, 'query' => $query]);
     }
 }

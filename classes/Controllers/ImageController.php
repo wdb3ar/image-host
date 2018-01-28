@@ -12,7 +12,7 @@ class ImageController extends Controller
         $data = [];
 
         $uploadedFile = FormData::getUploadedFile();
-        $tags = FormData::getTags();
+        $tags = FormData::getTagsArr();
 
         $validator = new Validator;
         $validator->validateImage($uploadedFile);
@@ -43,7 +43,7 @@ class ImageController extends Controller
             }
             throw new Exception("Could not save file");
         }
-
+        $data['tags'] = FormData::getTags();
         return $this->view->generate('add', $data);
     }
 
@@ -74,7 +74,7 @@ class ImageController extends Controller
             throw new NotFoundException('Image with this id is not found');
         }
 
-        $tags = FormData::getTags();
+        $tags = FormData::getTagsArr();
 
         $validator = new Validator;
         $validator->validateTags($tags);

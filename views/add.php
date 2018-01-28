@@ -7,7 +7,7 @@
   </div>
   <div class="form-group<?= !empty($errors['tags']) ? ' has-danger' : '' ?>">
     <label for="inputTags">Tags</label>
-    <input type="text" name="tags" id="inputTags" placeholder="Enter tags">
+    <input type="text" name="tags" id="inputTags" placeholder="Enter tags" value="<?= !empty($tags) ? html($tags) : '' ?>">
     <?= !empty($errors['tags']) ? $errors['tags'] : '' ?>
     <small class="form-text text-muted">Please enter at least one tag.</small>
   </div>

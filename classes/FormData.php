@@ -4,7 +4,12 @@ class FormData
 {
     public static function getTags()
     {
-        $tags = array_key_exists('tags', $_POST) ? $_POST['tags'] : null;
+      return array_key_exists('tags', $_POST) ? $_POST['tags'] : null;
+    }
+
+    public static function getTagsArr()
+    {
+        $tags = self::getTags();
         if ($tags) {
             //Convert a string to an array, and delete the empty elements
             $tags = array_diff(explode(',', $_POST['tags']), ['']);
@@ -26,5 +31,10 @@ class FormData
     public static function getImageId()
     {
         return array_key_exists('imageId', $_POST) ? $_POST['imageId'] : null;
+    }
+
+    public static function getQuery()
+    {
+        return array_key_exists('q', $_GET) ? $_GET['q'] : null;
     }
 }
