@@ -29,7 +29,7 @@ class ApiController extends Controller
                 return $arr;
             };
             $images = array_map($convertObjToArr, $images);
-            $data = array_merge($images,  [['imagesCount' => $imagesCount, 'page' => $page, 'totalPages' => $pager->totalPages, 'pageSize'=>$pageSize]]);
+            $data = array_merge(['images' => $images],  ['pagination' => ['imagesCount' => $imagesCount, 'page' => $page, 'totalPages' => $pager->totalPages, 'pageSize'=>$pageSize]]);
         }
         exit(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
