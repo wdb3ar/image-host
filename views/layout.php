@@ -11,6 +11,7 @@
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/selectize.default.css" rel="stylesheet">
+    <link href="/css/magnific-popup.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="/css/custom.css" rel="stylesheet">
   </head>
@@ -52,6 +53,7 @@
     </main>
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/selectize.min.js"></script>
+    <script src="/js/jquery.magnific-popup.min.js"></script>
     <?php if (!empty($pagination)): ?>
       <script src="/js/jquery.twbsPagination.min.js"></script>
       <script>
