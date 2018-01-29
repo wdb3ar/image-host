@@ -303,6 +303,7 @@ class DataGateway
             $tagIds = array_merge($tagIds, $imageTagsIds, array_keys($foundsTagsArr));
 
             $tagIds = array_diff($tagIds, $removedTagIds);
+            $tagIds=array_unique($tagIds);
 
             if ($this->saveImageTagsRelations($imageId, $tagIds) && $this->deleteUnusedTags()) {
                 return true;
