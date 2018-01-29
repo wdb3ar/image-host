@@ -46,7 +46,9 @@
       <div class="album py-5 bg-light">
         <div class="container">
           <?php include __DIR__.'/'.$template.'.php' ?>
-          <ul id="pagination-demo" class="pagination-sm"></ul>
+          <?php if (!empty($pager) && $pager->totalPages>1): ?>
+          <ul id="pagination" class="pagination-sm"></ul>
+        <?php endif; ?>
         </div>
       </div>
 
@@ -54,14 +56,19 @@
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/selectize.min.js"></script>
     <script src="/js/jquery.magnific-popup.min.js"></script>
-    <?php if (!empty($pagination)): ?>
+    <?php if (!empty($pager) && $pager->totalPages>1): ?>
       <script src="/js/jquery.twbsPagination.min.js"></script>
       <script>
-      $('#pagination-demo').twbsPagination({
-        totalPages: 35,
+      $('#pagination').twbsPagination({
+        startPage: <?=$pager->page?>,
+        totalPages: <?=$pager->totalPages?>,
         visiblePages: 7,
+        initiateStartPageClick: false,
         onPageClick: function (event, page) {
-          console.log(page);
+          if (page == 1) {
+            return window.location.href = "/";
+          }
+          return window.location.href = "/?page="+page;
         }
       });
       </script>

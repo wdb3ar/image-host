@@ -26,13 +26,13 @@ class DataGateway
     public function getImageWithTagsById($imageId)
     {
         $sth = $this->dbh->prepare(
-        'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
-        FROM image AS i
-        JOIN image_tag AS it
-        ON i.id = image_id AND image_id = ?
-        JOIN tag AS t
-        ON t.id = tag_id
-        GROUP BY i.id'
+          'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+          FROM image AS i
+          JOIN image_tag AS it
+          ON i.id = image_id AND image_id = ?
+          JOIN tag AS t
+          ON t.id = tag_id
+          GROUP BY i.id'
         );
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
         if (!$sth->execute([$imageId])) {
@@ -41,19 +41,30 @@ class DataGateway
         return $sth->fetch();
     }
 
-    public function getImagesWithTagsByQuery($query)
+
+
+    public function getImagesWithTagsByQuery($searchQuery, Pager $pager)
     {
-        $sth = $this->dbh->prepare(
-        'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
-        FROM image AS i
-        JOIN image_tag AS it
-        ON i.id = image_id
-        JOIN tag AS t
-        ON t.id = tag_id AND t.name LIKE :query
-        GROUP BY i.id'
-        );
-        $query = '%'.$query.'%';
-        $sth->bindParam(':query', $query, PDO::PARAM_STR);;
+        $query = 'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+          FROM image AS i
+          JOIN image_tag AS it
+          ON i.id = image_id
+          JOIN tag AS t
+          ON t.id = tag_id AND t.name LIKE :query
+          GROUP BY i.id';
+        $isNeedPagination = $pager->totalPages>1;
+        if ($isNeedPagination) {
+            $query .= ' LIMIT :limit OFFSET :offset';
+        }
+        $sth = $this->dbh->prepare($query);
+        if ($isNeedPagination) {
+            $recordsPerPage = (int) $pager->recordsPerPage;
+            $sth->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
+            $offset = (int)  $pager->getOffset();
+            $sth->bindParam(':offset', $offset, PDO::PARAM_INT);
+        }
+        $searchQuery = '%'.$searchQuery.'%';
+        $sth->bindParam(':query', $searchQuery, PDO::PARAM_STR);
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
         if (!$sth->execute()) {
             return false;
@@ -61,18 +72,59 @@ class DataGateway
         return $sth->fetchAll();
     }
 
-    public function getImagesWithTags()
+    public function getCountImages()
     {
-        $sth = $this->dbh->query(
-          'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+        $sth = $this->dbh->prepare(
+      'SELECT COUNT(*) AS count FROM image'
+      );
+        if (!$sth->execute()) {
+            return false;
+        }
+        return $sth->fetch();
+    }
+
+    public function getCountImagesByQuery($searchQuery)
+    {
+        $sth = $this->dbh->prepare(
+          'SELECT count(*) AS count
           FROM image AS i
           JOIN image_tag AS it
-          ON i.id = it.image_id
+          ON i.id = image_id
           JOIN tag AS t
-          ON t.id = it.tag_id
-          GROUP BY i.id'
+          ON t.id = tag_id AND t.name LIKE :query'
         );
+        $searchQuery = '%'.$searchQuery.'%';
+        $sth->bindParam(':query', $searchQuery, PDO::PARAM_STR);
+        if (!$sth->execute()) {
+            return false;
+        }
+        return $sth->fetch();
+    }
+
+    public function getImagesWithTags(Pager $pager)
+    {
+        $query = 'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
+        FROM image AS i
+        JOIN image_tag AS it
+        ON i.id = it.image_id
+        JOIN tag AS t
+        ON t.id = it.tag_id
+        GROUP BY i.id';
+        $isNeedPagination = $pager->totalPages>1;
+        if ($isNeedPagination) {
+            $query .= ' LIMIT :limit OFFSET :offset';
+        }
+        $sth = $this->dbh->prepare($query);
+        if ($isNeedPagination) {
+            $recordsPerPage = (int) $pager->recordsPerPage;
+            $sth->bindParam(':limit', $recordsPerPage, PDO::PARAM_INT);
+            $offset = (int)  $pager->getOffset();
+            $sth->bindParam(':offset', $offset, PDO::PARAM_INT);
+        }
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
+        if (!$sth->execute()) {
+            return false;
+        }
         return $sth->fetchAll();
     }
 

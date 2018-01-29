@@ -27,3 +27,11 @@ footer p {
 .navbar-container .navbar-brand {
   margin-right: 30px;
 }
+
+#pagination {
+  justify-content: center;
+}
+
+.gallery-item {
+  cursor: pointer;
+}

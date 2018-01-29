@@ -30,11 +30,14 @@ $(document).ready(function() {
     }
   });
 
-  $('.album').magnificPopup({
-    delegate: 'img',
+  $('.album .gallery-item').magnificPopup({
     type: 'image',
-    gallery: {
-      enabled: true
+    gallery:{
+      enabled:true
     }
+  });
+
+  $('.img-popup-link').magnificPopup({
+    type: 'image'
   });
 });

@@ -1,5 +1,5 @@
 <div class="card mb-3">
-  <img class="card-img-top" src="<?=html(File::getFile($image->path))?>" alt="<?=html($image->name)?>">
+  <a class="img-popup-link" href="<?=html(File::getFile($image->path))?>"><img class="card-img-top" src="<?=html(File::getFile($image->path))?>" alt="<?=html($image->name)?>"></a>
   <div class="card-body">
     <form method="post" enctype="multipart/form-data">
       <div class="form-group<?= !empty($errors['tags']) ? ' has-danger' : '' ?>">

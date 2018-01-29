@@ -1,6 +1,8 @@
 <?php
 class Router
 {
+    public static $protocol;
+
     private static $routes = [
       '' => 'SiteController@actionIndex',
       'edit' => 'ImageController@actionEdit@imageId',
@@ -8,7 +10,8 @@ class Router
       'add' => 'ImageController@actionAdd',
       'add@post' => 'ImageController@actionAddPost',
       'delete@post' => 'ImageController@actionDeletePost',
-      'search' => 'SiteController@actionSearch'
+      'search' => 'SiteController@actionSearch',
+      'api' => 'ApiController@actionIndex',
     ];
 
     public static function start()
@@ -52,5 +55,18 @@ class Router
         } else {
             throw new NotFoundException('Action not found');
         }
+    }
+
+    public static function getProtocol()
+    {
+        if (!self::$protocol) {
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+                self::$protocol = 'https://';
+            } else {
+                self::$protocol = 'http://';
+            }
+        }
+
+        return self::$protocol;
     }
 }

@@ -4,7 +4,7 @@
         <?php foreach ($images as $image): ?>
         <div class="col-md-4">
           <div class="card mb-4 box-shadow">
-            <img class="card-img-top gallery-item" src="<?=html(File::getFile($image->path))?>" alt="<?=html($image->name)?>">
+            <a class="gallery-item" href="<?=html(File::getFile($image->path))?>"><img class="card-img-top" src="<?=html(File::getFile($image->path))?>" alt="<?=html($image->name)?>"></a>
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group" data-id="<?=html($image->id)?>">
