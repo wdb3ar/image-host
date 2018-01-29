@@ -63,7 +63,9 @@ class DataGateway
             $offset = (int)  $pager->getOffset();
             $sth->bindParam(':offset', $offset, PDO::PARAM_INT);
         }
-        $searchQuery = '%'.$searchQuery.'%';
+        if (!$api) {
+            $searchQuery = '%'.$searchQuery.'%';
+        }
         $sth->bindParam(':query', $searchQuery, PDO::PARAM_STR);
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Image');
         if (!$sth->execute()) {
@@ -83,7 +85,7 @@ class DataGateway
         return $sth->fetch();
     }
 
-    public function getCountImagesByQuery($searchQuery $api=false)
+    public function getCountImagesByQuery($searchQuery, $api=false)
     {
         $sth = $this->dbh->prepare(
           'SELECT count(*) AS count
@@ -94,7 +96,7 @@ class DataGateway
           ON t.id = tag_id AND t.name LIKE :query'
         );
         if (!$api) {
-          $searchQuery = '%'.$searchQuery.'%';
+            $searchQuery = '%'.$searchQuery.'%';
         }
         $sth->bindParam(':query', $searchQuery, PDO::PARAM_STR);
         if (!$sth->execute()) {
