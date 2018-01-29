@@ -43,7 +43,7 @@ class DataGateway
 
 
 
-    public function getImagesWithTagsByQuery($searchQuery, Pager $pager)
+    public function getImagesWithTagsByQuery($searchQuery, Pager $pager, $api = false)
     {
         $query = 'SELECT i.*, GROUP_CONCAT(t.id) AS tag_ids, GROUP_CONCAT(t.name) AS tag_names
           FROM image AS i
@@ -83,7 +83,7 @@ class DataGateway
         return $sth->fetch();
     }
 
-    public function getCountImagesByQuery($searchQuery)
+    public function getCountImagesByQuery($searchQuery $api=false)
     {
         $sth = $this->dbh->prepare(
           'SELECT count(*) AS count
@@ -93,7 +93,9 @@ class DataGateway
           JOIN tag AS t
           ON t.id = tag_id AND t.name LIKE :query'
         );
-        $searchQuery = '%'.$searchQuery.'%';
+        if (!$api) {
+          $searchQuery = '%'.$searchQuery.'%';
+        }
         $sth->bindParam(':query', $searchQuery, PDO::PARAM_STR);
         if (!$sth->execute()) {
             return false;

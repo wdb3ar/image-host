@@ -9,14 +9,14 @@ class ApiController extends Controller
         $pageSize = array_key_exists('pageSize', $_GET) ? $_GET['pageSize'] : $this->container->config['records_per_page'];
         $dataGateway = new DataGateway($this->container->getDbh());
         if ($tag) {
-            $imagesCount = $dataGateway->getCountImagesByQuery($tag);
+            $imagesCount = $dataGateway->getCountImagesByQuery($tag, true);
         } else {
             $imagesCount = $dataGateway->getCountImages();
         }
         $imagesCount = $imagesCount['count'];
         $pager = new Pager($imagesCount);
         if ($tag) {
-            $images = $dataGateway->getImagesWithTagsByQuery($tag, $pager);
+            $images = $dataGateway->getImagesWithTagsByQuery($tag, $pager, true);
         } else {
             $images = $dataGateway->getImagesWithTags($pager);
         }
