@@ -8,6 +8,9 @@ class SiteController extends Controller
         $imagesCount = $dataGateway->getCountImages();
         $imagesCount = $imagesCount['count'];
         $pager = new Pager($imagesCount);
+        if ($pager->page>1 && !$pager->isFoundImgForPage()) {
+            throw new NotFoundException('No images found for the current page');
+        }
         $images = $dataGateway->getImagesWithTags($pager);
 
         return $this->view->generate('index', ['images' => $images, 'pager' => $pager]);
@@ -20,7 +23,11 @@ class SiteController extends Controller
         $imagesCount = $dataGateway->getCountImagesByQuery($query);
         $imagesCount = $imagesCount['count'];
         $pager = new Pager($imagesCount);
+        if ($pager->page>1 && !$pager->isFoundImgForPage()) {
+            throw new NotFoundException('No images found for the current page');
+        }
         $images = $dataGateway->getImagesWithTagsByQuery($query, $pager);
+
         return $this->view->generate('index', ['images' => $images, 'query' => $query, 'pager' => $pager]);
     }
 }

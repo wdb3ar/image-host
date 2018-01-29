@@ -16,10 +16,14 @@
           </div>
         </div>
         <?php endforeach; ?>
+      <?php elseif (!empty($query)): ?>
+        <div class="col-md-12">
+           Nothing found.
+         </div>
       <?php else: ?>
         <div class="col-md-12">
            No images.
-      </div>
+         </div>
       <?php endif; ?>
 
     </div>

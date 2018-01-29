@@ -24,4 +24,14 @@ class Pager
     {
       return array_key_exists('page', $_GET) && Validator::checkId($_GET['page']) ? intval($_GET['page']) : 1;
     }
+
+    public static function getPageSize()
+    {
+      return array_key_exists('pageSize', $_GET) && Validator::checkId($_GET['pageSize']) ? intval($_GET['pageSize']) : $this->recordsPerPage;
+    }
+
+    public function isFoundImgForPage()
+    {
+      return $this->page <= $this->totalPages;
+    }
 }
