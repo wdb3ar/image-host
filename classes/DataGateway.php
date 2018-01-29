@@ -143,7 +143,6 @@ class DataGateway
 
         $sth->setFetchMode(PDO::FETCH_CLASS, 'Tag');
 
-        var_dump($sth, $tags, $sth->execute($tags), $sth->fetchAll());
         if ($sth->execute($tags)) {
             return $sth->fetchAll();
         }
@@ -298,9 +297,12 @@ class DataGateway
                 $tagIds = range($firstTagId, $firstTagId+count($tagsDiff)-1);
             }
             $imageTagsIds = array_keys($imageTagsArr);
+
             $removedTagIds = array_diff($imageTagsIds, array_keys($foundsTagsArr));
-            $tagIds = array_merge($tagIds, $imageTagsIds);
+            $tagIds = array_merge($tagIds, $imageTagsIds, array_keys($foundsTagsArr));
+
             $tagIds = array_diff($tagIds, $removedTagIds);
+
             if ($this->saveImageTagsRelations($imageId, $tagIds) && $this->deleteUnusedTags()) {
                 return true;
             }
