@@ -6,7 +6,7 @@ Simple image storage with tags and API
 - PHP 5.6 / 7
 - MySQL / MariaDB
 
-## Technologies used
+## Used plugins
 - Twitter Bootstrap
 - jQuery
 - Magnific Popup
@@ -21,5 +21,6 @@ Simple image storage with tags and API
 ## How to use the API
 - The API is available at example.com/api
 - Available Get parameters: tag, page, pageSize.
-- If the tag is not specified in the query parameters, it returns all images.
-- pageSize - number of items displayed on the page. If not specified is taken from the configuration file.
+- If the parameter 'tag' is not specified in the query parameters, it returns all images.
+- If the parameter 'page' is not set, the first page is displayed.
+- pageSize - the number of items displayed on the page. If not specified, it is taken from the configuration file.
