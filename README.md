@@ -19,7 +19,7 @@ Simple image storage with tags and API
 3. Edit the config.php file.
 
 ## How to use the API
-- The API is available at https://example.com/api
+- The API is available at example.com/api
 - Available Get parameters: tag, page, pageSize.
 - If the tag is not specified in the query parameters, it returns all images.
 - pageSize - number of items displayed on the page. If not specified is taken from the configuration file.
