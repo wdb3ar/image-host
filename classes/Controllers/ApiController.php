@@ -6,7 +6,7 @@ class ApiController extends Controller
     {
         $tag = array_key_exists('tag', $_GET) ? $_GET['tag'] : null;
         $page = Pager::getPage();
-        $pageSize = Pager::getPageSize();
+        $pageSize = Pager::getPageSize() ?: $this->container->config['records_per_page'];
         $dataGateway = new DataGateway($this->container->getDbh());
         if ($tag) {
             $imagesCount = $dataGateway->getCountImagesByQuery($tag, true);
@@ -23,6 +23,7 @@ class ApiController extends Controller
                 $images = $dataGateway->getImagesWithTags($pager);
             }
             if ($images) {
+    
                 $convertObjToArr = function ($item) {
                     $arr['id'] = $item->id;
                     $arr['url'] = Router::getProtocol() . $_SERVER['HTTP_HOST'] . File::getFile($item->path);

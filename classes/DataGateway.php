@@ -129,6 +129,7 @@ class DataGateway
         if (!$sth->execute()) {
             return false;
         }
+
         return $sth->fetchAll();
     }
 

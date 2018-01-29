@@ -1,7 +1,7 @@
 <?php
 class Pager
 {
-    public static $recordsPerPage;
+    public $recordsPerPage;
     public $page;
     public $totalPages;
     private $totalRecords;
@@ -10,14 +10,14 @@ class Pager
     {
         $this->page = self::getPage();
         $container = Container::getInstance();
-        self::$recordsPerPage = $container->config['records_per_page'];
+        $this->recordsPerPage = $container->config['records_per_page'];
         $this->totalRecords = $totalRecords;
-        $this->totalPages = ceil($totalRecords / self::$recordsPerPage);
+        $this->totalPages = ceil($totalRecords / $this->recordsPerPage);
     }
 
     public function getOffset()
     {
-        return self::$recordsPerPage * $this->page - self::$recordsPerPage;
+        return $this->recordsPerPage * $this->page - $this->recordsPerPage;
     }
 
     public static function getPage()
@@ -27,7 +27,7 @@ class Pager
 
     public static function getPageSize()
     {
-      return array_key_exists('pageSize', $_GET) && Validator::checkId($_GET['pageSize']) ? intval($_GET['pageSize']) : self::$recordsPerPage;
+      return array_key_exists('pageSize', $_GET) && Validator::checkId($_GET['pageSize']) ? intval($_GET['pageSize']) : null;
     }
 
     public function isFoundImgForPage()
